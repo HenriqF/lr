@@ -1,0 +1,2 @@
+gcc listrun.c readwrite.c -o lr
+echo ok
