@@ -38,6 +38,11 @@ void runLr(DWORD wait){
             snprintf(command, (size_t)i-ll+1, "%s", content+ll);
 
             if (startsWith(command, "//") == 1 || startsWith(command, "lr")){}
+            else if (startsWith(command, "#*") == 1){
+                char* rest = command+2;
+                DWORD time = atoi(rest);
+                Sleep(time);
+            }
             else if (startsWith(command, "#") == 1){
                 printf("Aperte enter para continuar...");
                 int c;
