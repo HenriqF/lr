@@ -14,15 +14,21 @@ comandos:
 
     prog_input: input
         define um input que run_control colocará. A lista de inputs é limpa sempre que run_control é executado
-
     out_contains: string
         procura por uma string na saida do ultimo run_control
 
     wait: tempo
         espera por tempo (ms)
-
     sleep:
         dorme até apertar enter
-
     log:
         coloca uma mensagem no terminal
+
+    path: caminho
+        adiciona ao diretório de execução atual "caminho"
+
+    path_abs: caminho
+        mnuda o diretório de execução atual para "caminho"
+
+    path_reset:
+        reseta o diretório de execução atual

@@ -18,6 +18,9 @@ var sections_life map[string]int = make(map[string]int)
 var program_output bytes.Buffer
 var program_input []string
 
+var workdir string
+var global_dir string
+
 func arquivo_existe(nome string) bool {
 	_, err := os.Stat(nome)
 	if err != nil {
@@ -37,6 +40,10 @@ func ler_arquivo(nome string) (string, []byte) {
 	return string(cont), cont
 }
 
+func path_abs(arg string) {
+
+}
+
 func out_contains(arg string) {
 	last_out := program_output.String()
 	if !strings.Contains(last_out, arg) {
@@ -47,6 +54,7 @@ func out_contains(arg string) {
 func run_control(arg string, silent bool) {
 	program_output.Reset()
 	cmd := exec.Command("cmd", "/C", arg)
+	cmd.Dir = global_dir
 
 	cmd.Stdout = &program_output
 	cmd.Stderr = &program_output
@@ -74,6 +82,7 @@ func run_control(arg string, silent bool) {
 
 func run(arg string, silent bool) {
 	cmd := exec.Command("cmd", "/C", arg)
+	cmd.Dir = global_dir
 
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -155,8 +164,19 @@ func read_section(section_name string) {
 		case "log":
 			fmt.Println(arg)
 
+		case "path":
+			global_dir = workdir + "\\" + arg
+			fmt.Printf("Diretório atual, [%v]\n", global_dir)
+		case "path_abs":
+			global_dir = arg
+			fmt.Printf("Diretório atual, [%v]\n", global_dir)
+
+		case "path_reset":
+			global_dir = workdir
+			fmt.Printf("Diretório atual, [%v]\n", global_dir)
+
 		default:
-			fmt.Println(command)
+
 		}
 
 	}
@@ -166,6 +186,8 @@ func main() {
 	log.SetFlags(0)
 	arq_lr_nome := "lr"
 	args := os.Args
+	workdir, _ = os.Getwd()
+	global_dir = workdir
 
 	entry_section := "main"
 

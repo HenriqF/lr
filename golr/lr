@@ -1,9 +1,10 @@
 [teste]
-    log: TESTE DO GOLR
+    log: ok
     end
+
+
 
 [main]
     srun: go build golr.go 
-    srun: .\golr teste
-    srun: rm golr.exe
+    run: .\golr teste
     end
