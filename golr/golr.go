@@ -14,9 +14,13 @@ import (
 
 var sections map[string][]string = make(map[string][]string)
 var sections_life map[string]int = make(map[string]int)
+var cronometros map[string]time.Time = make(map[string]time.Time)
 
 var program_output bytes.Buffer
 var program_input []string
+var program_name string
+
+var silent_mode bool = true
 
 var workdir string
 var global_dir string
@@ -40,10 +44,6 @@ func ler_arquivo(nome string) (string, []byte) {
 	return string(cont), cont
 }
 
-func path_abs(arg string) {
-
-}
-
 func out_contains(arg string) {
 	last_out := program_output.String()
 	if !strings.Contains(last_out, arg) {
@@ -51,7 +51,7 @@ func out_contains(arg string) {
 	}
 }
 
-func run_control(arg string, silent bool) {
+func task(arg string, silent bool) {
 	program_output.Reset()
 	cmd := exec.Command("cmd", "/C", arg)
 	cmd.Dir = global_dir
@@ -60,8 +60,20 @@ func run_control(arg string, silent bool) {
 	cmd.Stderr = &program_output
 	stdin, _ := cmd.StdinPipe()
 
+	var name string
+	if program_name == "" {
+		if len(arg) > 20 {
+			name = arg[:20]
+		} else {
+			name = arg
+		}
+	} else {
+		name = program_name
+		program_name = ""
+	}
+
 	if !silent {
-		fmt.Printf("\nrun_control==============\n")
+		fmt.Printf("\n============[%v]============\n", name)
 	}
 	cmd.Start()
 	// if err != nil {
@@ -76,32 +88,121 @@ func run_control(arg string, silent bool) {
 
 	fmt.Printf("%v", program_output.String())
 	if !silent {
-		fmt.Printf("\n=========================\n")
+		resto := strings.Repeat("=", 2+len(name))
+		fmt.Printf("\n%v========================\n", resto)
 	}
 }
 
 func run(arg string, silent bool) {
 	cmd := exec.Command("cmd", "/C", arg)
-	cmd.Dir = global_dir
 
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Stdin = os.Stdin
 
+	var name string
+	if program_name == "" {
+		if len(arg) > 20 {
+			name = arg[:20]
+		} else {
+			name = arg
+		}
+
+	} else {
+		name = program_name
+		program_name = ""
+	}
+
 	if !silent {
-		fmt.Printf("\nrun======================\n")
+		fmt.Printf("\n============[%v]============\n", name)
 	}
 	cmd.Run()
 	// if err != nil {
 	// 	log.Fatalf("deu merda %v", err)
 	// }
 	if !silent {
-		fmt.Printf("\n=========================\n")
+		resto := strings.Repeat("=", 2+len(name))
+		fmt.Printf("\n%v========================\n", resto)
+	}
+}
+
+func command_handler(command string, arg string) {
+	switch command {
+
+	case "goto":
+		read_section(arg)
+
+	case "run_name":
+		program_name = arg
+
+	case "run":
+		run(arg, silent_mode)
+
+	case "task":
+		task(arg, silent_mode)
+
+	case "out_contains":
+		out_contains(arg)
+
+	case "silent":
+		if arg == "1" {
+			silent_mode = true
+		} else {
+			silent_mode = false
+		}
+
+	case "new_input":
+		program_input = append(program_input, arg)
+
+	case "wait":
+		tts, err := strconv.Atoi(arg)
+		if err != nil {
+			log.Fatalf("Quantia de tempo imprópria: [%v]", arg)
+		}
+		time.Sleep(time.Duration(tts) * time.Millisecond)
+
+	case "sleep":
+		fmt.Println("Enter para continuar...")
+		s := bufio.NewScanner(os.Stdin)
+		s.Scan()
+
+	case "log":
+		fmt.Printf("/!\\ %v\n", arg)
+
+	case "path":
+		global_dir = workdir + "\\" + arg
+		fmt.Printf("Diretório atual, [%v]\n", global_dir)
+
+	case "path_abs":
+		global_dir = arg
+		fmt.Printf("Diretório atual, [%v]\n", global_dir)
+
+	case "path_reset":
+		global_dir = workdir
+		fmt.Printf("Diretório atual, [%v]\n", global_dir)
+
+	case "time_start":
+		cronometros[arg] = time.Now()
+
+	case "time_declare":
+		if _, existe := cronometros[arg]; existe {
+			fmt.Printf("(%v): %v\n", arg, time.Now().Sub(cronometros[arg]))
+		}
+
+	case "time_end":
+		if _, existe := cronometros[arg]; existe {
+			fmt.Printf("(%v): %v\n", arg, time.Now().Sub(cronometros[arg]))
+			delete(cronometros, arg)
+		}
+
+	default:
+
 	}
 }
 
 func read_section(section_name string) {
 	fmt.Printf("Executando: [%v]\n", section_name)
+
 	section := sections[section_name]
 	if sections_life[section_name] <= 0 {
 		log.Fatalf("[%v] não pode ser usado novamente/ não existe", section_name)
@@ -126,59 +227,7 @@ func read_section(section_name string) {
 		}
 		command := section[i][0:cmd_end]
 		arg := strings.TrimSpace(section[i][cmd_end+1 : len(section[i])])
-
-		switch command {
-		case "goto":
-			read_section(arg)
-
-		case "run":
-			run(arg, false)
-
-		case "run_control":
-			run_control(arg, false)
-
-		case "srun":
-			run(arg, true)
-
-		case "srun_control":
-			run_control(arg, true)
-
-		case "out_contains":
-			out_contains(arg)
-
-		case "prog_input":
-			program_input = append(program_input, arg)
-
-		case "wait":
-			tts, err := strconv.Atoi(arg)
-			if err != nil {
-				log.Fatalf("Quantia de tempo imprópria: [%v]", arg)
-			}
-			time.Sleep(time.Duration(tts) * time.Millisecond)
-
-		case "sleep":
-			fmt.Println("Enter para continuar...")
-			s := bufio.NewScanner(os.Stdin)
-			s.Scan()
-
-		case "log":
-			fmt.Println(arg)
-
-		case "path":
-			global_dir = workdir + "\\" + arg
-			fmt.Printf("Diretório atual, [%v]\n", global_dir)
-		case "path_abs":
-			global_dir = arg
-			fmt.Printf("Diretório atual, [%v]\n", global_dir)
-
-		case "path_reset":
-			global_dir = workdir
-			fmt.Printf("Diretório atual, [%v]\n", global_dir)
-
-		default:
-
-		}
-
+		command_handler(command, arg)
 	}
 }
 

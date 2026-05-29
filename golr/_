@@ -1,34 +1,41 @@
-comandos:
-    goto: n
-        pula pra uma section [n]
+goto: nome
+    pula pra um bloco [nome]
+log:
+    coloca uma mensagem no terminal
+silent: true/false
+    liga/desliga modo silencioso 
 
-    run: cmd
-        executa um comando
-    srun: cmd
-        é mais silencioso que run
 
-    run_control: cmd
-        executa o comando e coloca inputs automaticamente e armazena a saida
-    srun_control:
-        é mais silencioso que run_control
 
-    prog_input: input
-        define um input que run_control colocará. A lista de inputs é limpa sempre que run_control é executado
-    out_contains: string
-        procura por uma string na saida do ultimo run_control
+time_start: nome
+    inicia um cronometro "nome"
+time_declare: nome
+    mostra o tempo atual do cronometro "nome"
+time_end: nome
+    termina o cronometro "nome" e declara o tempo
+wait: tempo
+    espera por tempo (ms)
+sleep:
+    dorme até apertar enter
 
-    wait: tempo
-        espera por tempo (ms)
-    sleep:
-        dorme até apertar enter
-    log:
-        coloca uma mensagem no terminal
 
-    path: caminho
-        adiciona ao diretório de execução atual "caminho"
 
-    path_abs: caminho
-        mnuda o diretório de execução atual para "caminho"
+run: cmd
+    executa um comando
+task: cmd
+    executa o comando e coloca inputs automaticamente e armazena a saida
+run_name: nome
+    define o nome para a execucao do proximo programa
+new_input: input
+    define um input que task colocará. A lista de inputs é limpa sempre que task é executado
+out_contains: string
+    procura por uma string na saida do ultimo task
 
-    path_reset:
-        reseta o diretório de execução atual
+
+
+path: caminho
+    adiciona ao diretório de execução atual "caminho"
+path_abs: caminho
+    muda o diretório de execução atual para "caminho"
+path_reset:
+    reseta o diretório de execução atual

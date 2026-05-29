@@ -1,10 +1,25 @@
-[teste]
-    log: ok
+[main]
+    goto: build
+    goto:teste
     end
 
+[build]
+    time_start: build
+    run: go build golr.go
+    time_end: build
+    end
 
+[teste]
+    silent: 0
+    run: .\golr target
 
-[main]
-    srun: go build golr.go 
-    run: .\golr teste
+    task: .\golr target
+    out_contains: sigma
+
+    end
+
+[target]
+    time_start: target
+    log: sigma
+    time_end: target
     end
