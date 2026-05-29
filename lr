@@ -1,2 +1,3 @@
 gcc listrun.c readwrite.c -o lr
+echo wow
 echo ok
