@@ -1,0 +1,28 @@
+comandos:
+    goto: n
+        pula pra uma section [n]
+
+    run: cmd
+        executa um comando
+    srun: cmd
+        é mais silencioso que run
+
+    run_control: cmd
+        executa o comando e coloca inputs automaticamente e armazena a saida
+    srun_control:
+        é mais silencioso que run_control
+
+    prog_input: input
+        define um input que run_control colocará. A lista de inputs é limpa sempre que run_control é executado
+
+    out_contains: string
+        procura por uma string na saida do ultimo run_control
+
+    wait: tempo
+        espera por tempo (ms)
+
+    sleep:
+        dorme até apertar enter
+
+    log:
+        coloca uma mensagem no terminal
